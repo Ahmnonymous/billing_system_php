@@ -23,9 +23,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="managerDropdown">
                         <a class="dropdown-item" href="prod.php">Products</a>
-                        <a class="dropdown-item" href="cust.php">Customers</a>
                         <a class="dropdown-item" href="emp.php">Employees</a>
-                        <a class="dropdown-item" href="project.php">Projects</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -35,6 +33,7 @@
                     <div class="dropdown-menu" aria-labelledby="receiptDropdown">
                         <a class="dropdown-item" href="rec.php">Create Receipt</a>
                         <a class="dropdown-item" href="m_rec.php">Manage Receipt</a>
+                        <a class="dropdown-item" href="bal.php">Receiving Balance</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">

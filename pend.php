@@ -28,9 +28,8 @@
                 include 'includes/db_connection.php';
 
                 // Retrieve data from the database using the query
-                $sql = "SELECT recm.date, recm.invoice, cust.name, cust.phone, recm.balance
-                        FROM recm, cust
-                        WHERE recm.cust_id = cust.id";
+                $sql = "SELECT recm.date, recm.id, recm.cust_name, recm.phone, recm.balance
+                        FROM recm where recm.balance > 0";
 
                 $result = $conn->query($sql);
 
@@ -40,8 +39,8 @@
                         echo '<tr>';
                         echo '<td>' . $serialNumber . '</td>';
                         echo '<td>' . $row['date'] . '</td>';
-                        echo '<td>' . $row['invoice'] . '</td>';
-                        echo '<td>' . $row['name'] . '</td>';
+                        echo '<td>' . $row['id'] . '</td>';
+                        echo '<td>' . $row['cust_name'] . '</td>';
                         echo '<td>' . $row['phone'] . '</td>';
                         echo '<td>' . $row['balance'] . '</td>';
                         echo '</tr>';

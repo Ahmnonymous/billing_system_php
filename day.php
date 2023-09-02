@@ -14,33 +14,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $selectedDate = $_POST['selected_date'];
 
     // Retrieve data from the database using the query for income
-    $incomeQuery = "SELECT recm.invoice, CONCAT(cust.name, ' (', project.name, ')') AS name, SUM(rect.sq_ft) AS sq_ft, recm.balance, recm.grand_total, recm.advance
+    $incomeQuery = "SELECT recm.id AS recm_id, CONCAT(recm.cust_name, ' (', recm.proj_name, ')') AS name, SUM(rect.sq_ft) AS sq_ft, recm.balance, recm.grand_total, recm.advance
     FROM recm
-    JOIN cust ON recm.cust_id = cust.id
-    JOIN project ON recm.project_id = project.id
     JOIN rect ON recm.id = rect.recm_id
     WHERE recm.recm_date = '$selectedDate'
-    GROUP BY recm.invoice";
+    GROUP BY recm.id";
 
     $incomeResult = $conn->query($incomeQuery);
 
     if ($incomeResult->num_rows > 0) {
-        // Retrieve expenditure data before looping through income data
-        $expenditureQuery = "SELECT name, amount FROM exp WHERE date = '$selectedDate'";
-        $expenditureResult = $conn->query($expenditureQuery);
-        
-        if ($expenditureResult->num_rows > 0) {
-            while ($expRow = $expenditureResult->fetch_assoc()) {
-                $expenditureData[] = $expRow;
-                $tot_exp += $expRow['amount'];
-            }
-        }
-
         // Loop through income data
         while ($row = $incomeResult->fetch_assoc()) {
-            $incomeData[] = $row;
+            $recmId = $row['recm_id']; // Get the recm_id
+            $incomeData[$recmId] = $row;
             $tot_rec += $row['advance'];
             $tot_sq += $row['sq_ft'];
+        }
+    }
+
+    // Retrieve expenditure data based on the selected date
+    $expenditureQuery = "SELECT id, name, amount FROM exp WHERE date = '$selectedDate'";
+    $expenditureResult = $conn->query($expenditureQuery);
+
+    if ($expenditureResult->num_rows > 0) {
+        // Loop through expenditure data
+        while ($row = $expenditureResult->fetch_assoc()) {
+            $incomeId = $row['id']; // Get the associated income_id
+            // Check if the income_id exists in incomeData
+            if (isset($incomeData[$incomeId])) {
+                // Add expenditure data to the income record
+                $incomeData[$incomeId]['expenditure'][] = $row;
+                $tot_exp += $row['amount'];
+            }
         }
     }
 }
@@ -114,22 +119,28 @@ $conn->close();
                 </tr>
             </thead>
             <tbody>
-                <?php
-                foreach ($incomeData as $row) {
+            <?php
+                foreach ($incomeData as $recmId => $incomeRow) {
                     echo '<tr>';
-                    echo '<td>' . $row['invoice'] . '</td>';
-                    echo '<td>' . $row['name'] . '</td>';
-                    echo '<td>' . $row['sq_ft'] . '</td>';
-                    echo '<td>' . $row['grand_total'] . '</td>';
-                    echo '<td>' . $row['advance'] . '</td>';
-                    echo '<td>' . $row['balance'] . '</td>';
-                    
-                    // Loop through expenditure data for the current income record
-                    foreach ($expenditureData as $expRow) {
-                        echo '<td>' . $expRow['name'] . '</td>';
-                        echo '<td>' . $expRow['amount'] . '</td>';
+                    echo '<td>' . $recmId . '</td>';
+                    echo '<td>' . $incomeRow['name'] . '</td>';
+                    echo '<td>' . $incomeRow['sq_ft'] . '</td>';
+                    echo '<td>' . $incomeRow['grand_total'] . '</td>';
+                    echo '<td>' . $incomeRow['advance'] . '</td>';
+                    echo '<td>' . $incomeRow['balance'] . '</td>';
+
+                    // Check if there is expenditure data for the current income record
+                    if (isset($incomeRow['expenditure'])) {
+                        foreach ($incomeRow['expenditure'] as $expenditureRow) {
+                            echo '<td>' . $expenditureRow['name'] . '</td>';
+                            echo '<td>' . $expenditureRow['amount'] . '</td>';
+                        }
+                    } else {
+                        // If no expenditure data found, add empty values
+                        echo '<td></td>';
+                        echo '<td></td>';
                     }
-                    
+
                     echo '</tr>';
                 }
                 ?>

@@ -5,7 +5,7 @@ include 'db_connection.php'; // Your database connection
 $recmId = isset($_GET['id']) ? $_GET['id'] : '';
 
 // Fetch details related to the rect table
-$sqlRectDetails = "SELECT rect.recm_id, product.name, rect.height, rect.width, rect.sq_ft, rect.total
+$sqlRectDetails = "SELECT rect.recm_id, product.name, rect.height, rect.width, rect.sq_ft, rect.qty,rect.total
                    FROM rect
                    INNER JOIN product ON rect.prod_id = product.id
                    WHERE rect.recm_id = ?";
@@ -24,10 +24,8 @@ while ($rowRectDetails = $resultRectDetails->fetch_assoc()) {
 }
 
 // Fetch data based on recmId from recm table
-$sqlRecm = "SELECT recm.date, project.name AS project_name, recm.invoice, cust.name AS customer_name, recm.phone, recm.balance, recm.advance, recm.grand_total
+$sqlRecm = "SELECT recm.date, recm.proj_name AS project_name, recm.id, recm.cust_name AS customer_name, recm.phone, recm.balance, recm.advance, recm.grand_total
             FROM recm
-            INNER JOIN cust ON recm.cust_id = cust.id
-            INNER JOIN project ON recm.project_id = project.id
             WHERE recm.id = ?";
 
 $stmtRecm = $conn->prepare($sqlRecm);

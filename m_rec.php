@@ -3,16 +3,15 @@ include 'includes/header.php';
 include 'includes/db_connection.php'; // Your database connection
 
 // Get search parameters if submitted
-$invoice = isset($_GET['invoice']) ? $_GET['invoice'] : '';
+$id = isset($_GET['id']) ? $_GET['id'] : '';
 $customer = isset($_GET['customer']) ? $_GET['customer'] : '';
 $phone = isset($_GET['phone']) ? $_GET['phone'] : '';
 
 // Construct the SQL query with optional search parameters
-$sql = "SELECT recm.id, recm.date, recm.invoice, cust.name AS customer_name, recm.phone, recm.balance
+$sql = "SELECT recm.id, recm.date, recm.cust_name AS customer_name, recm.phone, recm.balance
         FROM recm
-        INNER JOIN cust ON recm.cust_id = cust.id
-        WHERE recm.invoice LIKE '%$invoice%'
-        AND cust.name LIKE '%$customer%'
+        WHERE recm.id LIKE '%$id%'
+        AND recm.cust_name LIKE '%$customer%'
         AND recm.phone LIKE '%$phone%'";
 
 $result = $conn->query($sql);
@@ -35,8 +34,8 @@ $result = $conn->query($sql);
         <form action="" method="get">
         <div class="form-row">
                 <div class="col-md-4 mb-2">
-                    <label for="invoice">Invoice</label>
-                    <input type="text" class="form-control" id="invoice" name="invoice">
+                    <label for="id">Invoice</label>
+                    <input type="text" class="form-control" id="id" name="id">
                 </div>
                 <div class="col-md-4 mb-2">
                     <label for="customer">Customer Name</label>
@@ -70,8 +69,9 @@ $result = $conn->query($sql);
         <tbody>
             <?php while ($row = $result->fetch_assoc()) : ?>
                 <tr>
-                    <td><?= $row['date'] ?></td>
-                    <td><?= $row['invoice'] ?></td>
+                
+                    <td><?= date('d-M-y', strtotime($row['date'])) ?></td>
+                    <td><?= $row['id'] ?></td>
                     <td><?= $row['customer_name'] ?></td>
                     <td><?= $row['phone'] ?></td>
                     <td><?= $row['balance'] ?></td>
@@ -164,11 +164,11 @@ $(".print-link").click(function () {
             printableContent += '</div>';
             printableContent += '</div>';
             
-            // Date and invoice
+            // Date and id
             printableContent += '<div class="box">';
             printableContent += '<div class="row">';
             printableContent += '<div class="col"><strong>Date</strong><span>' + data.recm.date + '</span></div>';
-            printableContent += '<div class="col"><strong>Invoice</strong><span>' + data.recm.invoice + '</span></div>';
+            printableContent += '<div class="col"><strong>Invoice</strong><span>' + data.recm.id + '</span></div>';
             printableContent += '</div>';
             printableContent += '</div>';
             

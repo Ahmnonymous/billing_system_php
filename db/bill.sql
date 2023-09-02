@@ -14,17 +14,6 @@ CREATE TABLE IF NOT EXISTS exp (
     date DATE DEFAULT CURRENT_DATE
 );
 
-CREATE TABLE IF NOT EXISTS project(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name  VARCHAR(255)
-);
-
-CREATE TABLE IF NOT EXISTS cust(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name  VARCHAR(255),
-    phone VARCHAR(15)
-);
-
 CREATE TABLE IF NOT EXISTS product (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -35,16 +24,13 @@ CREATE TABLE IF NOT EXISTS product (
 CREATE TABLE IF NOT EXISTS recm (
     id INT AUTO_INCREMENT PRIMARY KEY,
     recm_date DATE DEFAULT CURRENT_DATE,
-    cust_id INT,
-    project_id INT,
-    invoice VARCHAR(10),
+    cust_name VARCHAR(255), 
+    proj_name VARCHAR(255), 
     date DATE,
     phone VARCHAR(15),
     advance DECIMAL(10, 2),
     balance DECIMAL(10, 2),
-    grand_total DECIMAL(10, 2),
-    FOREIGN KEY (cust_id) REFERENCES cust(id),
-    FOREIGN KEY (project_id) REFERENCES project(id)
+    grand_total DECIMAL(10, 2)
 );
 
 CREATE TABLE IF NOT EXISTS rect (
@@ -56,6 +42,7 @@ CREATE TABLE IF NOT EXISTS rect (
     height DECIMAL(10, 2),
     width DECIMAL(10, 2),
     sq_ft DECIMAL(10, 2),
+    qty INT,
     total DECIMAL(10, 2),
     FOREIGN KEY (recm_id) REFERENCES recm(id),
     FOREIGN KEY (prod_id) REFERENCES product(id)
@@ -79,16 +66,6 @@ CREATE TABLE IF NOT EXISTS atd (
     FOREIGN KEY (sal_id) REFERENCES sal(id)
 );
 
-
--- Insert data into the 'cust' table
-INSERT INTO cust (name,phone)
-VALUES
-    ('Ahmed Raza(Developer)', 03365759589);
-
--- Insert data into the 'project' table
-INSERT INTO project (name)
-VALUES
-    ('China');
 
 -- Insert data into the 'product' table
 INSERT INTO product (name, category, rate)
