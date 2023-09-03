@@ -112,114 +112,112 @@ if ($maxIdResult->num_rows > 0) {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-    $(document).ready(function() {
+$(document).ready(function() {
+    function calculateGrandTotal() {
+        var grandTotal = 0;
+        $(".total").each(function() {
+            var rowTotal = parseFloat($(this).val());
+            if (!isNaN(rowTotal)) {
+                grandTotal += rowTotal;
+            }
+        });
+        $("#g_total").val(grandTotal.toFixed(2));
+    }
 
-        function calculateGrandTotal() {
-            var grandTotal = 0;
-            $(".total").each(function() {
-                var rowTotal = parseFloat($(this).closest("tr").find(".total").val());
-                if (!isNaN(rowTotal)) {
-                    grandTotal += rowTotal;
-                }
-            });
-            $("#g_total").val(grandTotal.toFixed(2));
+    
+    // Calculate total whenever height, width, or quantity changes in a row
+    $("#ReceiptRows").on("input", ".height, .width, .qty", function() {
+        var row = $(this).closest("tr");
+        var height = parseFloat(row.find(".height").val()) || 0;
+        var width = parseFloat(row.find(".width").val()) || 0;
+        var qty = parseInt(row.find(".qty").val()) || 0;
+        var totalElement = row.find(".total");
+
+        // Check if height, width, and qty are valid numbers
+        if (!isNaN(height) && !isNaN(width) && !isNaN(qty)) {
+            var sqft = (height * width * qty).toFixed(2);
+            row.find(".sqft").val(sqft);
+        } else {
+            // Handle invalid input gracefully, e.g., clear the sqft field
+            row.find(".sqft").val("");
         }
 
-        // Add row button functionality
-        let serialNumber = 2; 
-        $("#addRow").click(function() {
-            var newRow = `
-                <tr>
-                    <td><input type="text" class="form-control" name="ser_no[]" readonly value="${serialNumber}"></td>
-                    <td><input type="number" step="0.01" class="form-control width" name="width[]"></td>
-                    <td><input type="number" step="0.01" class="form-control height" name="height[]"></td>
-                    <td><input type="number"  class="form-control qty" name="qty[]" required></td>
-                    <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly></td>
-                    
-                    <td>
-                        <?php include 'includes/prod_list.php'; ?>
-                    </td>
-                    <td><input type="number" step="0.01" class="form-control dis" name="dis[]"></td>
-                    <td><input type="number" step="0.01" class="form-control total" name="total[]" readonly></td>
-                </tr>
-            `;
-            serialNumber++;
-            $("#ReceiptRows").append(newRow);
-        });
+        calculateGrandTotal();
+    });
 
-       // Calculate sqft whenever height, width, or quantity changes
-        $("#ReceiptRows").on("input", ".height, .width, .qty", function() {
-            var row = $(this).closest("tr");
-            var height = parseFloat(row.find(".height").val());
-            var width = parseFloat(row.find(".width").val());
-            var qty = parseInt(row.find(".qty").val());
+// Calculate discount and update total when Enter key is pressed in the discount input field
+$("#ReceiptRows").on("keypress", ".dis", function(event) {
+    if (event.which === 13) { // Check if Enter key (key code 13) is pressed
+        event.preventDefault(); // Prevent the default behavior of Enter key (form submission)
+        
+        var row = $(this).closest("tr");
+        var discount = parseFloat(row.find(".dis").val()) || 0;
+        var totalElement = row.find(".total");
+        var total = parseFloat(row.find(".total").val());
+        var newTotal = (total - discount).toFixed(2);
+        totalElement.val(newTotal);
+        calculateGrandTotal();
+    }
+});
 
-            // Check if height, width, and qty are valid numbers
-            if (!isNaN(height) && !isNaN(width) && !isNaN(qty)) {
-                var sqft = (height * width * qty).toFixed(2);
-                row.find(".sqft").val(sqft);
-                calculateGrandTotal();
-            }
-        });
+    // Calculate total whenever product selection changes
+    $("#ReceiptRows").on("change", ".product", function() {
+        var row = $(this).closest("tr");
+        var sqft = parseFloat(row.find(".sqft").val()) || 0;
+        var selectedProduct = $(this).val();
 
-        // Calculate total whenever discount changes
-        $("#ReceiptRows").on("input", ".dis", function() {
-            var row = $(this).closest("tr");
-            var discount = parseFloat($(this).val());
-            var total = parseFloat(row.find(".total").val());
-
-            if (!isNaN(total) && !isNaN(discount)) {
-                var newTotal = total - discount;
-                row.find(".total").val(newTotal.toFixed(2));
-                calculateGrandTotal();
-            }
-        });
-
-
-        // Calculate total whenever product selection changes
-        $("#ReceiptRows").on("change", ".product", function() {
-            var row = $(this).closest("tr");
-            var sqft = parseFloat(row.find(".sqft").val());
-            var selectedProduct = $(this).val();
-
-            // Use AJAX to fetch the product rate from the server
-            $.ajax({
-                url: "includes/get_product_rate.php",
-                method: "GET",
-                data: { product: selectedProduct },
-                success: function(response) {
-                    var productRate = parseFloat(response);
-                    if (!isNaN(sqft) && !isNaN(productRate) ) {
-                        var total = (sqft * productRate).toFixed(2);
-                        row.find(".total").val(total);
-                        calculateGrandTotal();
-                    }
-                },
-                error: function() {
-                    row.find(".total").val("");
+        // Use AJAX to fetch the product rate from the server
+        $.ajax({
+            url: "includes/get_product_rate.php",
+            method: "GET",
+            data: { product: selectedProduct },
+            success: function(response) {
+                var productRate = parseFloat(response) || 0;
+                if (!isNaN(sqft) && !isNaN(productRate)) {
+                    var total = (sqft * productRate).toFixed(2);
+                    row.find(".total").val(total);
                     calculateGrandTotal();
                 }
-            });
-        });
-
-        
-        // Calculate grand total whenever .total input changes
-        $("#ReceiptRows").on("input", ".total", function() {
-            calculateGrandTotal();
-        });
-
-        // Calculate balance whenever advance input changes
-        $("#adv").on("input", function() {
-            var grandTotal = parseFloat($("#g_total").val());
-            var advance = parseFloat($(this).val());
-            if (!isNaN(grandTotal) && !isNaN(advance)) {
-                var balance = grandTotal - advance;
-                $("#bal").val(balance.toFixed(2));
+            },
+            error: function() {
+                row.find(".total").val("");
+                calculateGrandTotal();
             }
         });
-
     });
-</script>
 
+    // Calculate balance whenever advance input changes
+    $("#adv").on("input", function() {
+        var grandTotal = parseFloat($("#g_total").val()) || 0;
+        var advance = parseFloat($(this).val()) || 0;
+        if (!isNaN(grandTotal) && !isNaN(advance)) {
+            var balance = grandTotal - advance;
+            $("#bal").val(balance.toFixed(2));
+        }
+    });
+
+    // Add row button functionality
+    let serialNumber = 2;
+    $("#addRow").click(function() {
+        var newRow = `
+            <tr>
+                <td><input type="text" class="form-control" name="ser_no[]" readonly value="${serialNumber}"></td>
+                <td><input type="number" step="0.01" class="form-control width" name="width[]"></td>
+                <td><input type="number" step="0.01" class="form-control height" name="height[]"></td>
+                <td><input type="number" class="form-control qty" name="qty[]" required></td>
+                <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly></td>
+
+                <td>
+                    <?php include 'includes/prod_list.php'; ?>
+                </td>
+                <td><input type="number" step="0.01" class="form-control dis" name="dis[]"></td>
+                <td><input type="number" step="0.01" class="form-control total" name="total[]" readonly required data-initial-total="0" data-discount="0"></td>
+            </tr>
+        `;
+        serialNumber++;
+        $("#ReceiptRows").append(newRow);
+    });
+});
+</script>
 </body>
 </html>

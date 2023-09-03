@@ -46,8 +46,7 @@ $conn->close();
             <div class="form-row">
                 <div class="col-md-4 mb-2">
                     <label for="selected_date">Select Date</label>
-                    <input type="date" id="selected_date" name="selected_date" class="form-control" value="<?php echo isset($expense) ? $expense['date'] : ''; ?>" required>
-                    <input type="date" class="form-control" id="selected_date" name="selected_date" value="<?php echo date('Y-m-d'); ?>" required>
+                    <input type="date" class="form-control" id="selected_date" name="selected_date" value="<?php echo isset($expense) ? $expense['date'] : date('Y-m-d'); ?>" required>
                 </div>
                 <div class="col-md-4 mb-2">
                     <label for="name">Name</label>

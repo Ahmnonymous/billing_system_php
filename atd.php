@@ -18,7 +18,7 @@
             <div class="form-row">
                 <div class="col-md-4 mb-2">
                     <label for="date">Date</label>
-                    <input type="date" class="form-control" id="date" name="date" required>
+                    <input type="date" class="form-control" id="date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
                 </div>
                 <div class="col-md-4 mb-2">
                     <label for="emp_id">Employee</label>
