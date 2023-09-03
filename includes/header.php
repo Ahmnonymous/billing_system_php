@@ -34,6 +34,7 @@
                         <a class="dropdown-item" href="rec.php">Create Receipt</a>
                         <a class="dropdown-item" href="m_rec.php">Manage Receipt</a>
                         <a class="dropdown-item" href="bal.php">Receiving Balance</a>
+                        <a class="dropdown-item" href="reca.php">Receiving Amount</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -58,6 +59,7 @@
                     <div class="dropdown-menu" aria-labelledby="reportDropdown">
                         <a class="dropdown-item"  href="day.php">Daily Report</a>
                         <a class="dropdown-item"  href="m_atd.php">Salary Sheet</a>
+                        <a class="dropdown-item"  href="m_reca.php">Receiving Report</a>
                     </div>
                 </li>
             </ul>
