@@ -29,7 +29,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>expense Management</title>
+    <title>BillSys - Expense Management</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -44,13 +44,18 @@ $conn->close();
         <input type="hidden" name="id" value="<?php echo $expense['id']; ?>">
         <?php } ?>
             <div class="form-row">
-                <div class="col-md-6 mb-2">
+                <div class="col-md-4 mb-2">
+                    <label for="selected_date">Select Date</label>
+                    <input type="date" id="selected_date" name="selected_date" class="form-control" value="<?php echo isset($expense) ? $expense['date'] : ''; ?>" required>
+                    <input type="date" class="form-control" id="selected_date" name="selected_date" value="<?php echo date('Y-m-d'); ?>" required>
+                </div>
+                <div class="col-md-4 mb-2">
                     <label for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="<?php echo isset($expense) ? $expense['name'] : ''; ?>" required>
                 </div>
-                <div class="col-md-6 mb-2">
-                    <label for="amount">amount</label>
-                    <input type="tel" class="form-control" id="amount" name="amount" value="<?php echo isset($expense) ? $expense['amount'] : ''; ?>" required>
+                <div class="col-md-4 mb-2">
+                    <label for="amount">Amount</label>
+                    <input type="number" class="form-control" id="amount" name="amount" value="<?php echo isset($expense) ? $expense['amount'] : ''; ?>" required>
                 </div>
             </div>
             <div class="form-group text-center">

@@ -153,6 +153,7 @@ $(".print-link").click(function () {
             printableContent += '</head><body><div class="container">';
             
             // Header
+            printableContent += '<h1 class="text-center"><strong>ZAIDI FLEX</strong></h1>';
             printableContent += '<h2 class="text-center"><i><strong>RECEIPT</strong></i></h2><hr><br>';
             
             // Customer info
@@ -192,6 +193,7 @@ $(".print-link").click(function () {
             printableContent += '</div>';
             printableContent += '</div>';
             
+            printableContent += '<hr><p class="text-center">Tariq Zaidi: 03008001704 &nbsp;&nbsp;&nbsp; Mujahid Zaidi: 03007454901 <br> Opposite Admore Pump Gujranwala Road Zaidi Center Hafizabad</p>';
             printableContent += '</div></body></html>';
             
             // Create a new window for the printable content

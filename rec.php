@@ -64,6 +64,7 @@ if ($maxIdResult->num_rows > 0) {
                             <th>Quantity</th>
                             <th>Sq ft</th>
                             <th>Material</th>
+                            <th>Discount</th>
                             <th>Total</th>
                         </tr>
                     </thead>
@@ -78,6 +79,7 @@ if ($maxIdResult->num_rows > 0) {
                             <td>
                                 <?php include 'includes/prod_list.php'; ?>
                             </td>
+                            <td><input type="number" step="0.01" class="form-control dis" name="dis[]"></td>
                             <td><input type="number" step="0.01" class="form-control total" name="total[]" readonly required></td>
                         </tr>
                     </tbody>
@@ -137,6 +139,7 @@ if ($maxIdResult->num_rows > 0) {
                     <td>
                         <?php include 'includes/prod_list.php'; ?>
                     </td>
+                    <td><input type="number" step="0.01" class="form-control dis" name="dis[]"></td>
                     <td><input type="number" step="0.01" class="form-control total" name="total[]" readonly></td>
                 </tr>
             `;
@@ -155,6 +158,19 @@ if ($maxIdResult->num_rows > 0) {
             if (!isNaN(height) && !isNaN(width) && !isNaN(qty)) {
                 var sqft = (height * width * qty).toFixed(2);
                 row.find(".sqft").val(sqft);
+                calculateGrandTotal();
+            }
+        });
+
+        // Calculate total whenever discount changes
+        $("#ReceiptRows").on("input", ".dis", function() {
+            var row = $(this).closest("tr");
+            var discount = parseFloat($(this).val());
+            var total = parseFloat(row.find(".total").val());
+
+            if (!isNaN(total) && !isNaN(discount)) {
+                var newTotal = total - discount;
+                row.find(".total").val(newTotal.toFixed(2));
                 calculateGrandTotal();
             }
         });

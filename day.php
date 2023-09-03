@@ -2,16 +2,21 @@
 include 'includes/header.php';
 include 'includes/db_connection.php';
 
+// Initialize variables
 $tot_rec = 0;
 $tot_exp = 0;
 $tot_sq = 0;
-$incomeData = array();
-$expenditureData = array();
-$selectedDate=null;
+$incomeData = [];
+$expenditureData = [];
+$projectData = [];
+$selectedDate = null;
 
-// Process the form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $selectedDate = $_POST['selected_date'];
+// Function to retrieve income data
+function getIncomeData($conn, $selectedDate)
+{
+    $incomeData = [];
+    $tot_rec = 0;
+    $tot_sq = 0;
 
     // Retrieve data from the database using the query for income
     $incomeQuery = "SELECT recm.id AS recm_id, CONCAT(recm.cust_name, ' (', recm.proj_name, ')') AS name, SUM(rect.sq_ft) AS sq_ft, recm.balance, recm.grand_total, recm.advance
@@ -32,6 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    return [$incomeData, $tot_rec, $tot_sq];
+}
+
+// Function to retrieve expenditure data
+function getExpenditureData($conn, $selectedDate)
+{
+    $expenditureData = [];
+    $tot_exp = 0;
+
     // Retrieve expenditure data based on the selected date
     $expenditureQuery = "SELECT id, name, amount FROM exp WHERE date = '$selectedDate'";
     $expenditureResult = $conn->query($expenditureQuery);
@@ -39,15 +53,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($expenditureResult->num_rows > 0) {
         // Loop through expenditure data
         while ($row = $expenditureResult->fetch_assoc()) {
-            $incomeId = $row['id']; // Get the associated income_id
-            // Check if the income_id exists in incomeData
-            if (isset($incomeData[$incomeId])) {
-                // Add expenditure data to the income record
-                $incomeData[$incomeId]['expenditure'][] = $row;
-                $tot_exp += $row['amount'];
-            }
+            $expenditureData[] = $row;
+            $tot_exp += $row['amount']; // Calculate total expenditure
         }
     }
+
+    return [$expenditureData, $tot_exp];
+}
+
+// Function to retrieve project-wise total square feet data
+function getProjectData($conn, $selectedDate)
+{
+    $projectData = [];
+
+    // Retrieve project names and total square feet used
+    $projectQuery = "SELECT recm.proj_name, SUM(rect.sq_ft) AS total_sq_ft FROM recm,rect
+    where recm.id = rect.recm_id
+    and recm.date = '$selectedDate' GROUP BY proj_name";
+    $projectResult = $conn->query($projectQuery);
+
+    if ($projectResult->num_rows > 0) {
+        // Loop through project data
+        while ($row = $projectResult->fetch_assoc()) {
+            $projectName = $row['proj_name'];
+            $totalSqFt = $row['total_sq_ft'];
+            $projectData[$projectName] = $totalSqFt;
+        }
+    }
+
+    return $projectData;
+}
+
+// Process the form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $selectedDate = $_POST['selected_date'];
+
+    list($incomeData, $tot_rec, $tot_sq) = getIncomeData($conn, $selectedDate);
+    list($expenditureData, $tot_exp) = getExpenditureData($conn, $selectedDate);
+    $projectData = getProjectData($conn, $selectedDate);
 }
 
 $conn->close();
@@ -79,7 +122,6 @@ $conn->close();
         </form>
     </div>
 
-
     <div class="container mt-4 text-left">
         <br>
         <table class="table table-bordered vertical-borders">
@@ -87,14 +129,14 @@ $conn->close();
                 <tr>
                     <th colspan="1">Total Balance</th>
                     <th colspan="1"><span><?php echo ($tot_rec-$tot_exp); ?></span></th>
-                    <th colspan="3">Total Feet</th>
-                    <th colspan="3"><?php echo $tot_sq; ?></th>
+                    <th colspan="1">Expenditures</th>
+                    <th colspan="1"><?php echo $tot_exp; ?></th>
                 </tr>
                 <tr>
                     <th colspan="1">Income</th>
                     <th colspan="1"><?php echo $tot_rec; ?></th>
-                    <th colspan="3">Expenditures</th>
-                    <th colspan="3"><?php echo $tot_exp; ?></th>
+                    <th colspan="1">Total Feet</th>
+                    <th colspan="1"><?php echo $tot_sq; ?></th>
                 </tr>
             </thead>
         </table>
@@ -104,43 +146,17 @@ $conn->close();
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th colspan="6">Income</th>
-                    <th colspan="2">Expenditures</th>
-                </tr>
-                <tr>
-                    <th>Invoice</th>
-                    <th>Customer Name</th>
-                    <th>Size (Sq. ft)</th>
-                    <th>Total Amount</th>
-                    <th>Advance</th>
-                    <th>Balance</th>
-                    <th>Details</th>
-                    <th>Amount</th>
+                    <th>Project Name</th>
+                    <th>Total Sq Ft</th>
                 </tr>
             </thead>
             <tbody>
-            <?php
-                foreach ($incomeData as $recmId => $incomeRow) {
+                <?php
+                // Display project-wise total square feet in a table
+                foreach ($projectData as $projectName => $totalSqFt) {
                     echo '<tr>';
-                    echo '<td>' . $recmId . '</td>';
-                    echo '<td>' . $incomeRow['name'] . '</td>';
-                    echo '<td>' . $incomeRow['sq_ft'] . '</td>';
-                    echo '<td>' . $incomeRow['grand_total'] . '</td>';
-                    echo '<td>' . $incomeRow['advance'] . '</td>';
-                    echo '<td>' . $incomeRow['balance'] . '</td>';
-
-                    // Check if there is expenditure data for the current income record
-                    if (isset($incomeRow['expenditure'])) {
-                        foreach ($incomeRow['expenditure'] as $expenditureRow) {
-                            echo '<td>' . $expenditureRow['name'] . '</td>';
-                            echo '<td>' . $expenditureRow['amount'] . '</td>';
-                        }
-                    } else {
-                        // If no expenditure data found, add empty values
-                        echo '<td></td>';
-                        echo '<td></td>';
-                    }
-
+                    echo '<td>' . $projectName . '</td>';
+                    echo '<td>' . $totalSqFt . '</td>';
                     echo '</tr>';
                 }
                 ?>
@@ -148,6 +164,60 @@ $conn->close();
         </table>
     </div>
 
+
+    <div class="container mt-4 text-center">
+    <div class="d-flex justify-content-between">
+        <!-- Income Table -->
+        <table class="table table-bordered" style="table-layout: auto; width: 75%;">
+            <thead>
+                <tr>
+                    <th colspan="6">Income</th>
+                </tr>
+                <tr>
+                    <th style="width: 10%;">Invoice</th>
+                    <th style="width: 25%;">Name</th>
+                    <th style="width: 16.25%;">Size (Sq. ft)</th>
+                    <th style="width: 16.25%;">Total Amount</th>
+                    <th style="width: 16.25%;">Advance</th>
+                    <th style="width: 16.25%;">Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($incomeData as $recmId => $incomeRow): ?>
+                <tr>
+                    <td style="width: 10%;"><?= $recmId ?></td>
+                    <td style="width: 25%;"><?= $incomeRow['name'] ?></td>
+                    <td style="width: 16.25%;"><?= $incomeRow['sq_ft'] ?></td>
+                    <td style="width: 16.25%;"><?= $incomeRow['grand_total'] ?></td>
+                    <td style="width: 16.25%;"><?= $incomeRow['advance'] ?></td>
+                    <td style="width: 16.25%;"><?= $incomeRow['balance'] ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        
+        <!-- Expenditure Table -->
+        <table class="table table-bordered" style="table-layout: auto; width: 25%;">
+            <thead>
+                <tr>
+                    <th colspan="2">Expenditures</th>
+                </tr>
+                <tr>
+                    <th style="width: 50%;">Details</th>
+                    <th style="width: 50%;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($expenditureData as $expenseRow): ?>
+                <tr>
+                    <td style="width: 50%;"><?= $expenseRow['name'] ?></td>
+                    <td style="width: 50%;"><?= $expenseRow['amount'] ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
     <div class="container mt-4 text-center">
     <table class="table table-bordered">
         <thead>

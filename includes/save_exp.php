@@ -4,14 +4,15 @@ include 'db_connection.php';
 // Check if form data is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form inputs
+    $expdate = $_POST["selected_date"];
     $expName = $_POST["name"];
     $amount = $_POST["amount"];
     
     // Insert the new product into the database
-    $insertQuery = "INSERT INTO exp (name, amount) VALUES (?, ?)";
+    $insertQuery = "INSERT INTO exp (date,name, amount) VALUES (?,?, ?)";
     
     if ($stmt = $conn->prepare($insertQuery)) {
-        $stmt->bind_param("sd", $expName, $amount);
+        $stmt->bind_param("ssd", $expdate,$expName, $amount);
         $stmt->execute();
         $stmt->close();
         
