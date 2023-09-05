@@ -33,6 +33,7 @@
                     <div class="dropdown-menu" aria-labelledby="receiptDropdown">
                         <a class="dropdown-item" href="rec.php">Create Receipt</a>
                         <a class="dropdown-item" href="m_rec.php">Manage Receipt</a>
+                        <a class="dropdown-item" href="u_rec.php">Update Receipt</a>
                         <a class="dropdown-item" href="bal.php">Receiving Balance</a>
                         <a class="dropdown-item" href="reca.php">Receiving Amount</a>
                     </div>

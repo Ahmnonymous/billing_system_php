@@ -2,16 +2,6 @@
 include 'includes/header.php'; 
 include 'includes/db_connection.php'; 
 
-// Query to retrieve the maximum id from recm table
-$maxIdQuery = "SELECT MAX(id)+1 AS max_id FROM recm";
-$maxIdResult = $conn->query($maxIdQuery);
-
-$maxId = 1; // Default to 1 if there are no records yet
-
-if ($maxIdResult->num_rows > 0) {
-    $row = $maxIdResult->fetch_assoc();
-    $maxId = $row["max_id"] ; // Increment by 1 for the next invoice
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,10 +12,28 @@ if ($maxIdResult->num_rows > 0) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+
+<div class="container mt-4 text-center">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Retrieve Receipt</h2>
+            <hr class="my-4">
+            <form method="post" id="retrieveForm">
+                <div class="form-group">
+                    <label for="invoiceNumber">Invoice #</label>
+                    <input type="text" class="form-control" id="invoiceNumber" name="invoiceNumber">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
     <div class="container mt-4 text-center">
-        <h2>Create Receipt</h2>
+        <h2>Update Receipt</h2>
         <hr class="my-4">
-        <form action="includes/create_rec.php" method="post">
+        <form action="includes/upd_rec.php" method="post">
             <div class="form-group">
                 <div class="row">
                     <div class="col">
@@ -33,7 +41,7 @@ if ($maxIdResult->num_rows > 0) {
                         <input type="cust_name" class="form-control" id="cust_name" name="cust_name">
                     </div>
                     <div class="col">
-                        <label for="project">Project Name</label>
+                        <label for="proj_name">Project Name</label>
                         <input type="proj_name" class="form-control" id="proj_name" name="proj_name">
                     </div>
                     <div class="col">
@@ -50,7 +58,7 @@ if ($maxIdResult->num_rows > 0) {
                     </div>
                     <div class="col">
                         <label for="invoice">Invoice No.</label>
-                        <input type="text" class="form-control" id="invoice" name="invoice" value="<?php echo $maxId; ?>" readonly required>
+                        <input type="text" class="form-control" id="invoice" name="invoice" readonly required>
                     </div>
                 </div>
             </div>
@@ -72,7 +80,6 @@ if ($maxIdResult->num_rows > 0) {
                             <td><input type="number" step="0.01" class="form-control height" name="height[]" required></td>
                             <td><input type="number" class="form-control qty" name="qty[]" required></td>
                             <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly required></td>
-                            
                             <td>
                                 <?php include 'includes/prod_list.php'; ?>
                             </td>
@@ -103,7 +110,7 @@ if ($maxIdResult->num_rows > 0) {
                 </div>
             </div>
             <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">Update</button>
             </div>
         </form>
     </div>
@@ -203,7 +210,6 @@ $(document).ready(function() {
     });
 
     // Add row button functionality
-
     $("#addRow").click(function() {
         var newRow = `
             <tr>
@@ -211,7 +217,6 @@ $(document).ready(function() {
                 <td><input type="number" step="0.01" class="form-control height" name="height[]"></td>
                 <td><input type="number" class="form-control qty" name="qty[]" required></td>
                 <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly></td>
-
                 <td>
                     <?php include 'includes/prod_list.php'; ?>
                 </td>
@@ -221,6 +226,65 @@ $(document).ready(function() {
         $("#ReceiptRows").append(newRow);
     });
 });
+</script>
+<script>
+    // Handle form submission for retrieving information
+$("#retrieveForm").submit(function(event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+    
+    var invoiceNumber = $("#invoiceNumber").val();
+    
+    // Use AJAX to fetch data based on the entered invoice number
+    $.ajax({
+        url: "includes/retrieve_invoice.php", // Create a PHP script to handle the database query
+        method: "POST",
+        data: { invoiceNumber: invoiceNumber },
+        success: function(response) {
+            // Parse the response and fill the fields with retrieved data
+            var data = JSON.parse(response);
+            if (data) {
+                $("#cust_name").val(data.cust_name);
+                $("#proj_name").val(data.proj_name);
+                $("#date").val(data.date);
+                $("#phone").val(data.phone);
+                $("#invoice").val(data.id);
+                $("#dis").val(data.disc);
+                $("#adv").val(data.advance);
+                $("#bal").val(data.balance);
+                $("#g_total").val(data.grand_total);
+                
+                // Clear and recreate the table rows with retrieved data from 'rect' table
+                $("#ReceiptRows").empty();
+                data.rect.forEach(function(rowData) {
+                    addTableRow(rowData);
+                });
+            } else {
+                // Handle the case when the invoice number is not found
+                alert("Invoice number not found.");
+            }
+        },
+        error: function() {
+            alert("Error retrieving data. Please try again.");
+        }
+    });
+});
+// Function to add a table row with the given data
+function addTableRow(rowData) {
+    var newRow = `
+        <tr>
+            <td><input type="number" step="0.01" class="form-control width" name="width[]" value="${rowData.width}"></td>
+            <td><input type="number" step="0.01" class="form-control height" name="height[]" value="${rowData.height}"></td>
+            <td><input type="number" class="form-control qty" name="qty[]" value="${rowData.qty}" required></td>
+            <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" value="${rowData.sq_ft}" readonly required></td>
+            <td>
+                <?php include 'includes/prod_list.php'; ?>
+            </td>
+            <td><input type="number" step="0.01" class="form-control total" name="total[]" value="${rowData.total}" readonly required></td>
+        </tr>
+    `;
+    $("#ReceiptRows").append(newRow);
+}
+
 </script>
 </body>
 </html>

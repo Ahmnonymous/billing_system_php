@@ -20,7 +20,6 @@ function insertRecord($conn, $query, $bindTypes, $values) {
     }
     return false;
 }
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Retrieve form inputs
@@ -30,33 +29,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $date = $_POST["date"];
     $advance = $_POST["adv"];
     $balance = $_POST["bal"];
+    $dis = $_POST["dis"];
     $grandTotal = $_POST["g_total"];
 
     // Insert data into the 'recm' table
-    $recmQuery = "INSERT INTO recm (cust_name, proj_name, date, phone, advance, balance, grand_total) 
-    VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $recmValues = [$custName, $project, $date, $phone, $advance, $balance, $grandTotal];
-    $recmId = insertRecord($conn, $recmQuery, "ssssddd", $recmValues);
+    $recmQuery = "INSERT INTO recm (cust_name, proj_name, date, phone, disc, advance, balance, grand_total) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $recmValues = [$custName, $project, $date, $phone, $dis, $advance, $balance, $grandTotal];
+    $recmId = insertRecord($conn, $recmQuery, "ssssdddd", $recmValues);
 
     
     if ($recmId !== false) {
         // Insert data into the 'rect' table
-        $rectQuery = "INSERT INTO rect (recm_id, prod_id, ser_no, height, width, sq_ft,qty, total) 
-                      VALUES (?, ?, ?, ?, ?, ?,?,?)";
+        $rectQuery = "INSERT INTO rect (recm_id, prod_id, ser_no, height, width, sq_ft, qty, total) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $rectStmt = $conn->prepare($rectQuery);
-        foreach ($_POST["ser_no"] as $key => $serNo) {
-            $height = $_POST["height"][$key];
+        
+        $serNo = 1; // Initialize serial number
+        
+        foreach ($_POST["total"] as $key => $height) {
             $width = $_POST["width"][$key];
             $sqft = $_POST["sqft"][$key];
             $qty = $_POST["qty"][$key];
             $productName = $_POST["product"][$key];
-            $total = $_POST["total"][$key];
+            $total = $_POST["height"][$key];
             
             $productId = getEntityId($conn, "product", "name", $productName);
             
-            $rectValues = [$recmId, $productId, $serNo, $height, $width, $sqft,$qty, $total];
+            $rectValues = [$recmId, $productId, $serNo, $height, $width, $sqft, $qty, $total];
             $rectStmt->bind_param("iissddid", ...$rectValues);
             $rectStmt->execute();
+            
+            $serNo++; // Increment serial number for the next row
         }
         $rectStmt->close();
 
@@ -65,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     } else {
         // Handle errors
-        echo "Error: " . $conn->error;
+        echo "Error: " . $conn->error();
     }
 
     // Close the database connection

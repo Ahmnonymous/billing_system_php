@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS recm (
     proj_name VARCHAR(255), 
     date DATE,
     phone VARCHAR(15),
+    disc  DECIMAL(10, 2),
     advance DECIMAL(10, 2),
     balance DECIMAL(10, 2),
     grand_total DECIMAL(10, 2)
