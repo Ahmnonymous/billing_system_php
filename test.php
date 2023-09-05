@@ -1,170 +1,290 @@
-<?php
-include 'includes/header.php';
-include 'includes/db_connection.php';
+<?php 
+include 'includes/header.php'; 
+include 'includes/db_connection.php'; 
 
-$tot_rec = 0;
-$tot_exp = 0;
-$tot_sq = 0;
-$incomeData = array();
-$expenditureData = array();
-
-// Process the form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $selectedDate = $_POST['selected_date'];
-
-    // Retrieve data from the database using the query for income
-    $incomeQuery = "SELECT recm.invoice, CONCAT(cust.name, ' (', project.name, ')') AS name, SUM(rect.sq_ft) AS sq_ft, recm.balance, recm.grand_total, recm.advance
-    FROM recm
-    JOIN cust ON recm.cust_id = cust.id
-    JOIN project ON recm.project_id = project.id
-    JOIN rect ON recm.id = rect.recm_id
-    WHERE recm.recm_date = '$selectedDate'
-    GROUP BY recm.invoice";
-
-    $incomeResult = $conn->query($incomeQuery);
-
-    if ($incomeResult->num_rows > 0) {
-        // Retrieve expenditure data before looping through income data
-        $expenditureQuery = "SELECT name, amount FROM exp WHERE date = '$selectedDate'";
-        $expenditureResult = $conn->query($expenditureQuery);
-        
-        if ($expenditureResult->num_rows > 0) {
-            while ($expRow = $expenditureResult->fetch_assoc()) {
-                $expenditureData[] = $expRow;
-                $tot_exp += $expRow['amount'];
-            }
-        }
-
-        // Loop through income data
-        while ($row = $incomeResult->fetch_assoc()) {
-            $incomeData[] = $row;
-            $tot_rec += $row['advance'];
-            $tot_sq += $row['sq_ft'];
-        }
-    }
-}
-
-$conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receipt View</title>
+    <title>BillSys - Receipt Form</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container mt-4 text-center">
-        <h2>Day Book - Daily Report</h2>
-        <hr>
+
+<div class="container mt-4 text-center">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Retrieve Receipt</h2>
+            <hr class="my-4">
+            <form method="post" id="retrieveForm">
+                <div class="form-group">
+                    <label for="invoiceNumber">Invoice #</label>
+                    <input type="text" class="form-control" id="invoiceNumber" name="invoiceNumber">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
     </div>
-
-    <div class="container mt-4 text-center">
-        <br>
-        <form method="POST" class="d-inline-block">
-            <div class="form-group">
-                <label for="selected_date" class="mr-2">Select Date</label>
-                <input type="date" id="selected_date" name="selected_date" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary ml-2">Submit</button>
-        </form>
-    </div>
-
-
-    <div class="container mt-4 text-left">
-        <br>
-        <table class="table table-bordered vertical-borders">
-            <thead>
-                <tr>
-                    <th colspan="1">Total Balance</th>
-                    <th colspan="1"><span><?php echo ($tot_rec-$tot_exp); ?></span></th>
-                    <th colspan="3">Total Feet</th>
-                    <th colspan="3"><?php echo $tot_sq; ?></th>
-                </tr>
-                <tr>
-                    <th colspan="1">Income</th>
-                    <th colspan="1"><?php echo $tot_rec; ?></th>
-                    <th colspan="3">Project Name</th>
-                    <th colspan="3">Project Name</th>
-
-                </tr>
-                <tr>
-                    <th colspan="1">Expenditures</th>
-                    <th colspan="1"><?php echo $tot_exp; ?></th>
-                </tr>
-            </thead>
-        </table>
-    </div>
-
-    <div class="container mt-4 text-center">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th colspan="6">Income</th>
-                    <th colspan="2">Remaining Amounts</th>
-                    <th colspan="2">Expenditures</th>
-                </tr>
-                <tr>
-                    <th>Invoice</th>
-                    <th>Customer Name</th>
-                    <th>Size (Sq. ft)</th>
-                    <th>Total Amount</th>
-                    <th>Advance</th>
-                    <th>Balance</th>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Details</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                foreach ($incomeData as $row) {
-                    echo '<tr>';
-                    echo '<td>' . $row['invoice'] . '</td>';
-                    echo '<td>' . $row['name'] . '</td>';
-                    echo '<td>' . $row['sq_ft'] . '</td>';
-                    echo '<td>' . $row['grand_total'] . '</td>';
-                    echo '<td>' . $row['advance'] . '</td>';
-                    echo '<td>' . $row['balance'] . '</td>';
-                    
-                    // Loop through expenditure data for the current income record
-                    foreach ($expenditureData as $expRow) {
-                        echo '<td>' . $expRow['name'] . '</td>';
-                        echo '<td>' . $expRow['amount'] . '</td>';
-                    }
-                    
-                    echo '</tr>';
-                }
-                ?>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="container mt-4 text-center">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>TOTAL RECEIVED</th>
-                <th>EXPENSES</th>
-                <th>AMOUNT</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><?php echo $tot_rec; ?></td>
-                <td><?php echo $tot_exp; ?></td>
-                <td><?php echo ($tot_rec - $tot_exp); ?></td>
-            </tr>
-        </tbody>
-    </table>
 </div>
 
+
+    <div class="container mt-4 text-center">
+        <h2>Update Receipt</h2>
+        <hr class="my-4">
+        <form action="includes/upd_rec.php" method="post">
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <label for="cust_name">Customer Name</label>
+                        <input type="cust_name" class="form-control" id="cust_name" name="cust_name">
+                    </div>
+                    <div class="col">
+                        <label for="proj_name">Project Name</label>
+                        <input type="proj_name" class="form-control" id="proj_name" name="proj_name">
+                    </div>
+                    <div class="col">
+                        <label for="phone">Phone No.</label>
+                        <input type="tel" class="form-control" id="phone" name="phone">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <label for="date">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
+                    </div>
+                    <div class="col">
+                        <label for="invoice">Invoice No.</label>
+                        <input type="text" class="form-control" id="invoice" name="invoice" readonly required>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Width</th>
+                            <th>Height</th>
+                            <th>Quantity</th>
+                            <th>Sq ft</th>
+                            <th>Material</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ReceiptRows">
+                        <tr>
+                            <td><input type="number" step="0.01" class="form-control width" name="width[]" required></td>
+                            <td><input type="number" step="0.01" class="form-control height" name="height[]" required></td>
+                            <td><input type="number" class="form-control qty" name="qty[]" required></td>
+                            <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly required></td>
+                            <td>
+                                <?php include 'includes/prod_list.php'; ?>
+                            </td>
+                            <td><input type="number" step="0.01" class="form-control total" name="total[]" readonly required></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-secondary" id="addRow">Add Row</button>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <label for="dis">Discount</label>
+                        <input type="number" step="0.01" class="form-control dis" id="dis" name="dis">
+                    </div>
+                    <div class="col">
+                        <label for="g_total">Grand Total</label>
+                        <input type="number" class="form-control g_total" id="g_total" name="g_total" readonly>
+                    </div>
+                    <div class="col">
+                        <label for="adv">Advance</label>
+                        <input type="number" class="form-control" id="adv" name="adv" required>
+                    </div>
+                    <div class="col">
+                        <label for="bal">Balance</label>
+                        <input type="number" class="form-control" id="bal" name="bal" required>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+$(document).ready(function() {
+    function calculateGrandTotal() {
+        var grandTotal = 0;
+        $(".total").each(function() {
+            var rowTotal = parseFloat($(this).val());
+            if (!isNaN(rowTotal)) {
+                grandTotal += rowTotal;
+            }
+        });
+        $("#g_total").val(grandTotal.toFixed(2));
+    }
+
+    
+    // Calculate total whenever height, width, or quantity changes in a row
+    $("#ReceiptRows").on("input", ".height, .width, .qty", function() {
+        var row = $(this).closest("tr");
+        var height = parseFloat(row.find(".height").val()) || 0;
+        var width = parseFloat(row.find(".width").val()) || 0;
+        var qty = parseInt(row.find(".qty").val()) || 0;
+        var totalElement = row.find(".total");
+
+        // Check if height, width, and qty are valid numbers
+        if (!isNaN(height) && !isNaN(width) && !isNaN(qty)) {
+            var sqft = (height * width * qty).toFixed(2);
+            row.find(".sqft").val(sqft);
+        } else {
+            // Handle invalid input gracefully, e.g., clear the sqft field
+            row.find(".sqft").val("");
+        }
+
+        calculateGrandTotal();
+    });
+
+    // Calculate discount and update total when Enter key is pressed in the "dis" field
+    $(".dis").on("keypress", function(event) {
+        if (event.which === 13) { // Check if Enter key (key code 13) is pressed
+            event.preventDefault(); // Prevent the default behavior of Enter key (form submission)
+            var discount = parseFloat($(this).val()) || 0;
+            var grandTotal = parseFloat($("#g_total").val()) || 0;
+            var newGrandTotal = (grandTotal - discount).toFixed(2);
+            $("#g_total").val(newGrandTotal);
+            calculateBalance(); // Calculate the balance when the discount changes
+        }
+    });
+
+
+    // Function to calculate balance based on grand total and advance
+    function calculateBalance() {
+        var grandTotal = parseFloat($("#g_total").val()) || 0;
+        var advance = parseFloat($("#adv").val()) || 0;
+        var balance = grandTotal - advance;
+        $("#bal").val(balance.toFixed(2));
+    }  
+
+    // Calculate total whenever product selection changes
+    $("#ReceiptRows").on("change", ".product", function() {
+        var row = $(this).closest("tr");
+        var sqft = parseFloat(row.find(".sqft").val()) || 0;
+        var selectedProduct = $(this).val();
+
+        // Use AJAX to fetch the product rate from the server
+        $.ajax({
+            url: "includes/get_product_rate.php",
+            method: "GET",
+            data: { product: selectedProduct },
+            success: function(response) {
+                var productRate = parseFloat(response) || 0;
+                if (!isNaN(sqft) && !isNaN(productRate)) {
+                    var total = (sqft * productRate).toFixed(2);
+                    row.find(".total").val(total);
+                    calculateGrandTotal();
+                }
+            },
+            error: function() {
+                row.find(".total").val("");
+                calculateGrandTotal();
+            }
+        });
+    });
+
+    // Calculate balance whenever advance input changes
+    $("#adv").on("input", function() {
+        var grandTotal = parseFloat($("#g_total").val()) || 0;
+        var advance = parseFloat($(this).val()) || 0;
+        if (!isNaN(grandTotal) && !isNaN(advance)) {
+            var balance = grandTotal - advance;
+            $("#bal").val(balance.toFixed(2));
+        }
+    });
+
+    // Add row button functionality
+    $("#addRow").click(function() {
+        var newRow = `
+            <tr>
+                <td><input type="number" step="0.01" class="form-control width" name="width[]"></td>
+                <td><input type="number" step="0.01" class="form-control height" name="height[]"></td>
+                <td><input type="number" class="form-control qty" name="qty[]" required></td>
+                <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly></td>
+                <td>
+                    <?php include 'includes/prod_list.php'; ?>
+                </td>
+                <td><input type="number" step="0.01" class="form-control total" name="total[]" readonly required data-initial-total="0" data-discount="0"></td>
+            </tr>
+        `;
+        $("#ReceiptRows").append(newRow);
+    });
+});
+</script>
+<script>
+    // Handle form submission for retrieving information
+$("#retrieveForm").submit(function(event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+    
+    var invoiceNumber = $("#invoiceNumber").val();
+    
+    // Use AJAX to fetch data based on the entered invoice number
+    $.ajax({
+        url: "includes/retrieve_invoice.php", // Create a PHP script to handle the database query
+        method: "POST",
+        data: { invoiceNumber: invoiceNumber },
+        success: function(response) {
+            // Parse the response and fill the fields with retrieved data
+            var data = JSON.parse(response);
+            if (data) {
+                $("#cust_name").val(data.cust_name);
+                $("#proj_name").val(data.proj_name);
+                $("#date").val(data.date);
+                $("#phone").val(data.phone);
+                $("#invoice").val(data.id);
+                $("#dis").val(data.disc);
+                $("#adv").val(data.advance);
+                $("#bal").val(data.balance);
+                $("#g_total").val(data.grand_total);
+                
+                // Clear and recreate the table rows with retrieved data from 'rect' table
+                $("#ReceiptRows").empty();
+                data.rect.forEach(function(rowData) {
+                    addTableRow(rowData);
+                });
+            } else {
+                // Handle the case when the invoice number is not found
+                alert("Invoice number not found.");
+            }
+        },
+        error: function() {
+            alert("Error retrieving data. Please try again.");
+        }
+    });
+});
+// Function to add a table row with the given data
+function addTableRow(rowData) {
+    var newRow = `
+        <tr>
+            <td><input type="number" step="0.01" class="form-control width" name="width[]" value="${rowData.width}"></td>
+            <td><input type="number" step="0.01" class="form-control height" name="height[]" value="${rowData.height}"></td>
+            <td><input type="number" class="form-control qty" name="qty[]" value="${rowData.qty}" required></td>
+            <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" value="${rowData.sq_ft}" readonly required></td>
+            <td>
+                <?php include 'includes/prod_list.php'; ?>
+            </td>
+            <td><input type="number" step="0.01" class="form-control total" name="total[]" value="${rowData.total}" readonly required></td>
+        </tr>
+    `;
+    $("#ReceiptRows").append(newRow);
+}
+
+</script>
 </body>
 </html>

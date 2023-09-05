@@ -1,4 +1,4 @@
-<select class="form-control product" name="product[]" required>
+
     <?php
     include 'db_connection.php';
 
@@ -18,6 +18,7 @@
         }
     } else {
         // If prodId is not provided, fetch all product names
+        echo '<select class="form-control product" name="product[]" required>';
         $sql = "SELECT name FROM product";
         $result = $conn->query($sql);
 
@@ -26,8 +27,9 @@
                 echo '<option value="' . $row['name'] . '">' . $row['name'] . '</option>';
             }
         }
+        echo '</select>';
     }
     
     $conn->close();
     ?>
-</select>
+
