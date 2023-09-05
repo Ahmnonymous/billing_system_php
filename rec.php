@@ -70,7 +70,7 @@ if ($maxIdResult->num_rows > 0) {
                         <tr>
                             <td><input type="number" step="0.01" class="form-control width" name="width[]" required></td>
                             <td><input type="number" step="0.01" class="form-control height" name="height[]" required></td>
-                            <td><input type="number" class="form-control qty" name="qty[]" required></td>
+                            <td><input type="number" step="0.01" class="form-control qty" name="qty[]" required></td>
                             <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly required></td>
                             
                             <td>
@@ -209,7 +209,7 @@ $(document).ready(function() {
             <tr>
                 <td><input type="number" step="0.01" class="form-control width" name="width[]"></td>
                 <td><input type="number" step="0.01" class="form-control height" name="height[]"></td>
-                <td><input type="number" class="form-control qty" name="qty[]" required></td>
+                <td><input type="number" step="0.01" class="form-control qty" name="qty[]" required></td>
                 <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly></td>
 
                 <td>

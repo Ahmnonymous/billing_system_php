@@ -1,4 +1,3 @@
-
 <?php 
 include 'includes/header.php'; 
 include 'includes/db_connection.php'; 
@@ -79,7 +78,7 @@ include 'includes/db_connection.php';
                         <tr>
                             <td><input type="number" step="0.01" class="form-control width" name="width[]" required></td>
                             <td><input type="number" step="0.01" class="form-control height" name="height[]" required></td>
-                            <td><input type="number" class="form-control qty" name="qty[]" required></td>
+                            <td><input type="number" step="0.01" class="form-control qty" name="qty[]" required></td>
                             <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly required></td>
                             <td>
                                 <?php include 'includes/prod_list.php'; ?>
@@ -216,7 +215,7 @@ $(document).ready(function() {
             <tr>
                 <td><input type="number" step="0.01" class="form-control width" name="width[]"></td>
                 <td><input type="number" step="0.01" class="form-control height" name="height[]"></td>
-                <td><input type="number" class="form-control qty" name="qty[]" required></td>
+                <td><input type="number" step="0.01" class="form-control qty" name="qty[]" required></td>
                 <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" readonly></td>
                 <td>
                     <?php include 'includes/prod_list.php'; ?>
@@ -257,7 +256,8 @@ $("#retrieveForm").submit(function(event) {
                 // Clear and recreate the table rows with retrieved data from 'rect' table
                 $("#ReceiptRows").empty();
                 data.rect.forEach(function(rowData) {
-                    addTableRow(rowData);
+                    addTableRow(rowData, rowData.prod_id);
+
                 });
             } else {
                 // Handle the case when the invoice number is not found
@@ -269,13 +269,12 @@ $("#retrieveForm").submit(function(event) {
         }
     });
 });
-// Function to add a table row with the given data
-function addTableRow(rowData) {
+function addTableRow(rowData, productId) {
     var newRow = `
         <tr>
             <td><input type="number" step="0.01" class="form-control width" name="width[]" value="${rowData.width}"></td>
             <td><input type="number" step="0.01" class="form-control height" name="height[]" value="${rowData.height}"></td>
-            <td><input type="number" class="form-control qty" name="qty[]" value="${rowData.qty}" required></td>
+            <td><input type="number" step="0.01" class="form-control qty" name="qty[]" value="${rowData.qty}" required></td>
             <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" value="${rowData.sq_ft}" readonly required></td>
             <td>
                 <?php include 'includes/prod_list.php'; ?>
@@ -284,7 +283,9 @@ function addTableRow(rowData) {
         </tr>
     `;
     $("#ReceiptRows").append(newRow);
+
 }
+
 
 </script>
 </body>

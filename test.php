@@ -277,9 +277,8 @@ function addTableRow(rowData, productId) {
             <td><input type="number" class="form-control qty" name="qty[]" value="${rowData.qty}" required></td>
             <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" value="${rowData.sq_ft}" readonly required></td>
             <td>
-                <select class="form-control product" name="product[]" required>
-                    <!-- Product options will be populated dynamically -->
-                </select>
+            <td>
+                <?php include 'includes/prod_list.php'; ?>
             </td>
             <td><input type="number" step="0.01" class="form-control total" name="total[]" value="${rowData.total}" readonly required></td>
         </tr>
