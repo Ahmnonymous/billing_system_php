@@ -1,3 +1,4 @@
+
 <?php 
 include 'includes/header.php'; 
 include 'includes/db_connection.php'; 
@@ -256,8 +257,7 @@ $("#retrieveForm").submit(function(event) {
                 // Clear and recreate the table rows with retrieved data from 'rect' table
                 $("#ReceiptRows").empty();
                 data.rect.forEach(function(rowData) {
-                    addTableRow(rowData, rowData.prod_id);
-
+                    addTableRow(rowData);
                 });
             } else {
                 // Handle the case when the invoice number is not found
@@ -269,7 +269,8 @@ $("#retrieveForm").submit(function(event) {
         }
     });
 });
-function addTableRow(rowData, productId) {
+// Function to add a table row with the given data
+function addTableRow(rowData) {
     var newRow = `
         <tr>
             <td><input type="number" step="0.01" class="form-control width" name="width[]" value="${rowData.width}"></td>
@@ -277,32 +278,13 @@ function addTableRow(rowData, productId) {
             <td><input type="number" class="form-control qty" name="qty[]" value="${rowData.qty}" required></td>
             <td><input type="number" step="0.01" class="form-control sqft" name="sqft[]" value="${rowData.sq_ft}" readonly required></td>
             <td>
-                <select class="form-control product" name="product[]" required>
-                    <!-- Product options will be populated dynamically -->
-                </select>
+                <?php include 'includes/prod_list.php'; ?>
             </td>
             <td><input type="number" step="0.01" class="form-control total" name="total[]" value="${rowData.total}" readonly required></td>
         </tr>
     `;
     $("#ReceiptRows").append(newRow);
-
-    // Use AJAX to fetch and populate product options based on the provided product ID
-    $.ajax({
-        url: "includes/prod_list.php",
-        method: "GET",
-        data: { prodId: productId }, // Pass the product ID here
-        success: function(response) {
-            // Populate the product select field with options
-            var selectField = $("#ReceiptRows tr:last-child select.product");
-            selectField.empty().append(response);
-            selectField.val(rowData.product); // Set the selected product
-        },
-        error: function() {
-            // Handle the error if necessary
-        }
-    });
 }
-
 
 </script>
 </body>
