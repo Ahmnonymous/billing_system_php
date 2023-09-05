@@ -115,7 +115,7 @@ $conn->close();
         <form method="POST" class="d-inline-block">
             <div class="form-group">
                 <label for="selected_date" class="mr-2">Select Date</label>
-                <input type="date" id="selected_date" name="selected_date" class="form-control" required>
+                <input type="date" class="form-control" id="selected_date" name="selected_date" value="<?php echo date('Y-m-d'); ?>" required>
             </div>
             <button type="submit" class="btn btn-primary ml-2">Submit</button>
             <button class="btn btn-primary" id="printButton">Print Report</button>

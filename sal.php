@@ -19,7 +19,7 @@
                 </div>
                 <div class="form-group col-md-4">
                     <label for="date">Salary Date</label>
-                    <input type="date" class="form-control" id="date" name="date" required>
+                    <input type="date" class="form-control" id="date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
                 </div>
                 <div class="form-group col-md-4">
                     <label for="amount">Salary Amount</label>
