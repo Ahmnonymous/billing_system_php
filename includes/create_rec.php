@@ -41,8 +41,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($recmId !== false) {
         // Insert data into the 'rect' table
-        $rectQuery = "INSERT INTO rect (recm_id, prod_id, ser_no,total, width, sq_ft, qty, height) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $rectQuery = "INSERT INTO rect (date,recm_id, prod_id, ser_no,total, width, sq_ft, qty, height) 
+                      VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)";
         $rectStmt = $conn->prepare($rectQuery);
         
         $serNo = 1; // Initialize serial number
@@ -56,8 +56,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             $productId = getEntityId($conn, "product", "name", $productName);
             
-            $rectValues = [$recmId, $productId, $serNo, $height, $width, $sqft, $qty, $total];
-            $rectStmt->bind_param("iissddid", ...$rectValues);
+            $rectValues = [$date, $recmId, $productId, $serNo, $height, $width, $sqft, $qty, $total];
+            $rectStmt->bind_param("siissddid", ...$rectValues);
             $rectStmt->execute();
             
             $serNo++; // Increment serial number for the next row

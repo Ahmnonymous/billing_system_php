@@ -41,11 +41,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $deleteRectStmt->close();
 
             // Insert new 'rect' records based on the form data
-            $rectInsertQuery = "INSERT INTO rect (ser_no, prod_id, height, width, sq_ft, qty, total, recm_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $rectInsertQuery = "INSERT INTO rect (date,ser_no, prod_id, height, width, sq_ft, qty, total, recm_id) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)";
             $rectInsertStmt = $conn->prepare($rectInsertQuery);
 
             // Initialize a counter for serno
             $serno = 1;
+            $date = $_POST["date"];
 
             foreach ($_POST["total"] as $key => $total) {
                 $height = $_POST["height"][$key];
@@ -53,11 +54,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $sqft = $_POST["sqft"][$key];
                 $qty = $_POST["qty"][$key];
                 $productName = $_POST["product"][$key];
+                
 
                 $productId = getEntityId($conn, "product", "name", $productName);
 
-                $rectValues = [$serno, $productId, $height, $width, $sqft, $qty, $total, $invoiceId];
-                $rectInsertStmt->bind_param("iissddii", ...$rectValues);
+                $rectValues = [$date, $serno, $productId, $height, $width, $sqft, $qty, $total, $invoiceId];
+                $rectInsertStmt->bind_param("siissddii", ...$rectValues);
                 $rectInsertStmt->execute();
 
                 // Increment the serno for the next record

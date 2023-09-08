@@ -84,7 +84,7 @@ if (isset($_GET['id'])) {
             <tr>
                 <th>Product Name</th>
                 <th>Quantity</th>
-                <th>Action</th>
+                <th colspan="2">Action</th>
             </tr>
         </thead>
         <tbody>
@@ -99,6 +99,7 @@ if (isset($_GET['id'])) {
                     echo '<tr>';
                     echo '<td>' . $row['name'] . '</td>';
                     echo '<td>' . $row['quantity'] . '</td>';
+                    echo '<td><a href="m_prod.php?id=' . $row['id'] . '">Edit</a></td>';
                     echo "<td><a href=\"includes/del_qty.php?prod_id={$row['id']}&quantity={$row['quantity']}\">Delete</a></td>";
                     echo '</tr>';
                 }

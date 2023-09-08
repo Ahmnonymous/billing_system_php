@@ -22,7 +22,7 @@ function getIncomeData($conn, $selectedDate)
     $incomeQuery = "SELECT recm.id AS recm_id, CONCAT(recm.cust_name, ' (', recm.proj_name, ')') AS name, SUM(rect.sq_ft) AS sq_ft, recm.balance, recm.grand_total, recm.advance
     FROM recm
     JOIN rect ON recm.id = rect.recm_id
-    WHERE recm.recm_date = '$selectedDate'
+    WHERE recm.date = '$selectedDate'
     GROUP BY recm.id";
 
     $incomeResult = $conn->query($incomeQuery);
@@ -129,15 +129,20 @@ $conn->close();
                 <tr>
                     <th colspan="1">Total Balance</th>
                     <th colspan="1"><span><?php echo ($tot_rec-$tot_exp); ?></span></th>
-                    <th colspan="1">Expenditures</th>
-                    <th colspan="1"><?php echo $tot_exp; ?></th>
+                    <th colspan="1">Total Feet</th>
+                    <th colspan="1"><?php echo $tot_sq; ?></th>
+                    
                 </tr>
                 <tr>
                     <th colspan="1">Income</th>
                     <th colspan="1"><?php echo $tot_rec; ?></th>
-                    <th colspan="1">Total Feet</th>
+                    <th colspan="1">Remaining Media</th>
                     <th colspan="1"><?php echo $tot_sq; ?></th>
                 </tr>
+                <TR>
+                <th colspan="1">Expenditures</th>
+                    <th colspan="1"><?php echo $tot_exp; ?></th>
+                </TR>
             </thead>
         </table>
     </div>

@@ -44,14 +44,15 @@ if (isset($_GET['id'])) {
             <div class="col-md-4 mb-3">
                 <label for="category">Category</label>
                 <select class="form-control" id="category" name="category">
-                    <option value="" disabled selected>Select Category</option>
+                    <option value="" disabled>Select Category</option>
                     <?php
                     // Fetch existing categories and populate the dropdown
                     include 'includes/db_connection.php';
                     $sql = "SELECT DISTINCT category FROM product";
                     $result = $conn->query($sql);
                     while ($row = $result->fetch_assoc()) {
-                        echo '<option value="' . $row['category'] . '">' . $row['category'] . '</option>';
+                        $selected = ($product && $product['category'] == $row['category']) ? 'selected' : '';
+                        echo '<option value="' . $row['category'] . '" ' . $selected . '>' . $row['category'] . '</option>';
                     }
                     $conn->close();
                     ?>
