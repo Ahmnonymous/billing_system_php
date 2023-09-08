@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     } else {
         // Handle error if needed
-        echo "Error creating product: " . $conn->error;
+        echo "Error creating product: " . $conn->error();
     }
     
     $conn->close();

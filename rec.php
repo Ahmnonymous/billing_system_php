@@ -46,7 +46,7 @@ if ($maxIdResult->num_rows > 0) {
                 <div class="row">
                     <div class="col">
                         <label for="date">Date</label>
-                        <input type="date" class="form-control" id="date" name="date" value="<?php echo date('Y-m-d'); ?>" required>
+                        <input type="date" class="form-control" id="date" name="date" required>
                     </div>
                     <div class="col">
                         <label for="invoice">Invoice No.</label>

@@ -22,8 +22,9 @@
                         Management
                     </a>
                     <div class="dropdown-menu" aria-labelledby="managerDropdown">
-                        <a class="dropdown-item" href="prod.php">Products</a>
-                        <a class="dropdown-item" href="emp.php">Employees</a>
+                        <a class="dropdown-item" href="prod.php">Add Products</a>
+                        <a class="dropdown-item" href="m_prod.php">Manage Products</a>
+                        <a class="dropdown-item" href="emp.php">Add Employees</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
