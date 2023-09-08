@@ -1,31 +1,46 @@
 <?php
-
 include 'db_connection.php';
 
 // Check if form data is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Retrieve form inputs
-    $productId = $_POST["product_id"];
-    $date = $_POST["date"];
-    $qty = $_POST["qty"];
+    // Sanitize and retrieve form inputs
+    $productName = $_POST["name"];
+    $quantity = floatval($_POST["qty"]); // Ensure quantity is a float
+    $date = $_POST["date"]; // You might want to validate the date format
     
-    // Database connection
-    include 'db_connection.php';
+    // Get the product ID based on the product name
+    $getProductIdQuery = "SELECT id FROM product WHERE name = ?";
     
-    // Update the product details in the database
-    $updateQuery = "UPDATE product SET qty=? WHERE id = ?";
-    
-    if ($stmt = $conn->prepare($updateQuery)) {
-        $stmt->bind_param("di" , $qty, $productId);
+    if ($stmt = $conn->prepare($getProductIdQuery)) {
+        $stmt->bind_param("s", $productName);
         $stmt->execute();
-        $stmt->close();
+        $result = $stmt->get_result();
         
-        // Redirect back to the product list or display success message
-        header("Location: ../m_prod.php"); // You need to create this page to show the list of products
-        exit();
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            $productId = $row["id"];
+
+            // Update the existing record in prod_qty
+            $updateQuantityQuery = "UPDATE prod_qty SET date = ?, quantity = ? WHERE prod_id = ?";
+            if ($stmt = $conn->prepare($updateQuantityQuery)) {
+                $stmt->bind_param("sdi", $date, $quantity, $productId);
+                if ($stmt->execute()) {
+                    $stmt->close();
+                    header("Location: ../m_prod.php"); // Redirect on success
+                    exit();
+                } else {
+                    echo "Error updating quantity record: " . $stmt->error;
+                }
+            } else {
+                echo "Error updating quantity record: " . $conn->error();
+            }
+        } else {
+            // Handle error if the product name is not found
+            echo "Product not found: " . $productName;
+        }
     } else {
         // Handle error if needed
-        echo "Error updating product: " . $conn->error();
+        echo "Error fetching product ID: " . $conn->error();
     }
     
     $conn->close();
