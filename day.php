@@ -6,6 +6,7 @@ $tot_rec = 0;
 $tot_exp = 0;
 $tot_sq = 0;
 $tot_sq_o = 0;
+$tot_sq_q = 0;
 $incomeData = [];
 $expenditureData = [];
 $projectData = [];
@@ -42,6 +43,31 @@ function getIncomeData($conn, $selectedDate)
     return [$incomeData, $tot_rec, $tot_sq];
 }
 
+
+function getIncome($conn, $selectedDate)
+{
+    $incomeData = [];
+    $tot_sq_q = 0;
+
+    // Use a prepared statement to prevent SQL injection
+    $incomeQuery = "SELECT SUM(rect.qty) AS qty
+    FROM rect
+    WHERE rect.date <= ?";
+
+    $stmt = $conn->prepare($incomeQuery);
+    $stmt->bind_param("s", $selectedDate);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $tot_sq_q  += $row['qty'];
+        }
+    }
+
+    return [$incomeData, $tot_sq_q];
+}
+
 // Function to retrieve income data from prod_qty
 function getIncomeDat($conn, $selectedDate)
 {
@@ -49,15 +75,16 @@ function getIncomeDat($conn, $selectedDate)
     $tot_sq_o = 0;
 
     // Use a prepared statement to prevent SQL injection
-    $incomeQuery = "SELECT SUM(quantity) AS total_quantity FROM prod_qty";
+    $incomeQuery = "SELECT SUM(quantity) AS total_quantity FROM prod_qty where date <= ? ";
 
     $stmt = $conn->prepare($incomeQuery);
+    $stmt->bind_param("s", $selectedDate);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        $tot_sq_o = $row['total_quantity'];
+        $tot_sq_o += $row['total_quantity'];
     }
 
     return [$incomeData, $tot_sq_o];
@@ -119,6 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     list($incomeData, $tot_rec, $tot_sq) = getIncomeData($conn, $selectedDate);
     list($incomData, $tot_sq_o) = getIncomeDat($conn, $selectedDate);
+    list($incomData, $tot_sq_q) = getIncome($conn, $selectedDate);
     list($expenditureData, $tot_exp) = getExpenditureData($conn, $selectedDate);
     $projectData = getProjectData($conn, $selectedDate);
 }
@@ -166,7 +194,7 @@ $conn->close();
                 <tr>
                     <th colspan="1">Income</th>
                     <th colspan="1"><?php echo $tot_rec; ?></th>
-                    <th colspan="1">Total Feet </th>
+                    <th colspan="1">Total Feet Roll</th>
                     <th colspan="1"><?php echo $tot_sq_o; ?></th>
                 </tr>
                 <TR>
