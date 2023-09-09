@@ -176,10 +176,10 @@ $(".print-link").click(function () {
             // Rect details
             printableContent += '<div class="box">';
             printableContent += '<table class="table">';
-            printableContent += '<tr><th>No.</th><th>Material</th><th>Height</th><th>Width</th><th>Sq Ft</th><th>Total</th></tr>';
+            printableContent += '<tr><th>No.</th><th>Material</th><th>Height</th><th>Width</th><th>Qty</th><th>Sq Ft</th><th>Total</th></tr>';
             $.each(data.rect_details, function (index, rect) {
                 var serialNo = index + 1;
-                printableContent += '<tr><td>' + serialNo + '</td><td>' + rect.name + '</td><td>' + rect.height + '</td><td>' + rect.width + '</td><td>' + rect.sq_ft + '</td><td>' + rect.total + '</td></tr>';
+                printableContent += '<tr><td>' + serialNo + '</td><td>' + rect.name + '</td><td>' + rect.height + '</td><td>' + rect.width + '</td><td>' + rect.qty + '</td><td>' + rect.sq_ft + '</td><td>' + rect.total + '</td></tr>';
             });
             printableContent += '</table>';
             printableContent += '</div>';
