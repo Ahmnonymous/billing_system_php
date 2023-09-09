@@ -36,7 +36,7 @@ function getIncomeData($conn, $selectedDate)
             $recmId = $row['recm_id'];
             $incomeData[$recmId] = $row;
             $tot_rec += $row['advance'];
-            $tot_sq += $row['qty'];
+            $tot_sq += $row['sq_ft'];
         }
     }
 
@@ -50,7 +50,7 @@ function getIncome($conn, $selectedDate)
     $tot_sq_q = 0;
 
     // Use a prepared statement to prevent SQL injection
-    $incomeQuery = "SELECT SUM(rect.qty) AS qty
+    $incomeQuery = "SELECT SUM(rect.sq_ft) AS qty
     FROM rect
     WHERE rect.date <= ?";
 

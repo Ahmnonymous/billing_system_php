@@ -35,7 +35,7 @@ function getIncomeData($conn, $selectedDate)
             $recmId = $row['recm_id'];
             $incomeData[$recmId] = $row;
             $tot_rec += $row['advance'];
-            $tot_sq += $row['qty'];
+            $tot_sq += $row['sq_ft'];
         }
     }
 
@@ -49,7 +49,7 @@ function getIncome($conn, $selectedDate)
     $tot_sq_q = 0;
 
     // Use a prepared statement to prevent SQL injection
-    $incomeQuery = "SELECT SUM(rect.qty) AS qty
+    $incomeQuery = "SELECT SUM(rect.sq_ft) AS qty
     FROM rect
     WHERE rect.date <= ?";
 
@@ -118,7 +118,7 @@ function getProjectData($conn, $selectedDate)
     $projectData = [];
 
     // Use a prepared statement to prevent SQL injection
-    $projectQuery = "SELECT product.category, SUM(rect.qty) AS total_qty FROM product, rect
+    $projectQuery = "SELECT product.category, SUM(rect.sq_ft) AS total_qty FROM product, rect
     WHERE rect.prod_id = product.id
     AND rect.date = ?
     GROUP BY product.category";
