@@ -60,6 +60,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="reportDropdown">
                         <a class="dropdown-item"  href="day.php">Daily Report</a>
+                        <a class="dropdown-item"  href="qty.php">Inventory Report</a>
                         <a class="dropdown-item"  href="m_atd.php">Salary Sheet</a>
                         <a class="dropdown-item"  href="m_reca.php">Receiving Report</a>
                     </div>
