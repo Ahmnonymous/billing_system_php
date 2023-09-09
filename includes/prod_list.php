@@ -19,6 +19,7 @@
     } else {
         // If prodId is not provided, fetch all product names
         echo '<select class="form-control product" name="product[]" required>';
+        echo '<option value="">Select a Product</option>';
         $sql = "SELECT name FROM product";
         $result = $conn->query($sql);
 

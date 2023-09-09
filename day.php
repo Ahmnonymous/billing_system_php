@@ -120,10 +120,10 @@ function getProjectData($conn, $selectedDate)
     $projectData = [];
 
     // Use a prepared statement to prevent SQL injection
-    $projectQuery = "SELECT product.name, SUM(rect.qty) AS total_qty FROM product, rect
+    $projectQuery = "SELECT product.category, SUM(rect.sq_ft) AS total_qty FROM product, rect
     WHERE rect.prod_id = product.id
     AND rect.date = ?
-    GROUP BY product.name";
+    GROUP BY product.category";
 
     $stmt = $conn->prepare($projectQuery);
     $stmt->bind_param("s", $selectedDate);
@@ -132,7 +132,7 @@ function getProjectData($conn, $selectedDate)
 
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $projectName = $row['name'];
+            $projectName = $row['category'];
             $totalSqFt = $row['total_qty'];
             $projectData[$projectName] = $totalSqFt;
         }
