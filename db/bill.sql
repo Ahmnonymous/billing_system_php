@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS rect (
     height DECIMAL(10, 2),
     width DECIMAL(10, 2),
     sq_ft DECIMAL(10, 2),
-    qty INT,
+    qty DECIMAL(10, 2),
     total DECIMAL(10, 2),
     FOREIGN KEY (recm_id) REFERENCES recm(id),
     FOREIGN KEY (prod_id) REFERENCES product(id)
