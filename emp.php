@@ -66,7 +66,7 @@ $conn->close();
                     <tr>
                         <th>Employee Name</th>
                         <th>Salary</th>
-                        <th>Action</th>
+                        <th colspan="2">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -82,6 +82,7 @@ $conn->close();
                             echo '<td>' . $row['name'] . '</td>';
                             echo '<td>' . $row['salary'] . '</td>';
                             echo '<td><a href="emp.php?id=' . $row['id'] . '">Edit</a></td>';
+                            echo '<td><a href="includes/del_emp.php?id=' . $row['id'] . '">Delete</a></td>';
                             echo '</tr>';
                         }
                     } else {
